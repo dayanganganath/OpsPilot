@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.py[cod]
+.django-secret-key
+.env
+db.sqlite3
+db.sqlite3-journal
