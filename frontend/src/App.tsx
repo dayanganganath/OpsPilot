@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 
 import Dashboard from './Dashboard'
+import Monitors from './Monitors'
 
 type User = {
   id: number
@@ -177,6 +178,8 @@ export default function App() {
           <h1>Welcome, {user.username}</h1>
 
           <Dashboard />
+
+          <Monitors />
 
           {error && (
             <p className="error-message" role="alert">

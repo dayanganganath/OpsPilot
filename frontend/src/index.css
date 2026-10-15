@@ -224,3 +224,67 @@ button:disabled {
     flex-direction: column;
   }
 }
+
+.monitor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 18px;
+}
+
+.monitor-card {
+  padding: 24px;
+  background: #111c2e;
+  border: 1px solid #26354b;
+  border-radius: 14px;
+}
+
+.monitor-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.monitor-title h3 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.monitor-url {
+  color: #cbd5e1;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.up {
+  color: #99f6e4;
+  background: #123c38;
+}
+
+.status-badge.down,
+.status-badge.error {
+  color: #fecaca;
+  background: #451d29;
+}
+
+.status-badge.inactive {
+  color: #cbd5e1;
+  background: #334155;
+}
+
+.check-result {
+  min-height: 120px;
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 10px;
+  background: #0b1424;
+}
