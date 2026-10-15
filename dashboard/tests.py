@@ -12,8 +12,12 @@ class DashboardSummaryTests(APITestCase):
     def setUpTestData(cls):
         User = get_user_model()
 
-        cls.owner = User.objects.create_user(username="dash-owner")
-        cls.other = User.objects.create_user(username="dash-other")
+        cls.owner = User.objects.create_user(
+            username="dash-owner"
+        )
+        cls.other = User.objects.create_user(
+            username="dash-other"
+        )
 
         cls.application = Application.objects.create(
             name="Dashboard API",
@@ -67,10 +71,17 @@ class DashboardSummaryTests(APITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 10)
-        self.assertTrue(
-            all(value == 0 for value in response.data.values())
-        )
+        self.assertEqual(response.data, {
+            "total_applications": 0,
+            "total_monitors": 0,
+            "active_monitors": 0,
+            "up_monitors": 0,
+            "down_monitors": 0,
+            "error_monitors": 0,
+            "unchecked_monitors": 0,
+            "open_incidents": 0,
+            "resolved_incidents": 0,
+        })
 
     def test_unchecked_monitor_counts(self):
         response = self.client.get(self.url)
@@ -144,12 +155,17 @@ class DashboardSummaryTests(APITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["total_applications"], 1)
-        self.assertEqual(response.data["total_monitors"], 1)
-        self.assertEqual(response.data["active_monitors"], 1)
-        self.assertEqual(response.data["unchecked_monitors"], 1)
-        self.assertEqual(response.data["down_monitors"], 0)
-        self.assertEqual(response.data["open_incidents"], 0)
+        self.assertEqual(response.data, {
+            "total_applications": 1,
+            "total_monitors": 1,
+            "active_monitors": 1,
+            "up_monitors": 0,
+            "down_monitors": 0,
+            "error_monitors": 0,
+            "unchecked_monitors": 1,
+            "open_incidents": 0,
+            "resolved_incidents": 0,
+        })
 
     def test_inactive_resources_exclude_monitor_status(self):
         self.create_check(MonitorCheck.Status.UP)
@@ -159,7 +175,9 @@ class DashboardSummaryTests(APITestCase):
             self.environment,
             self.application,
         ):
-            with self.subTest(resource=type(resource).__name__):
+            with self.subTest(
+                resource=type(resource).__name__
+            ):
                 resource.is_active = False
                 resource.save(update_fields=["is_active"])
 
@@ -167,10 +185,12 @@ class DashboardSummaryTests(APITestCase):
 
                 self.assertEqual(response.status_code, 200)
                 self.assertEqual(
-                    response.data["total_monitors"], 1
+                    response.data["total_monitors"],
+                    1,
                 )
                 self.assertEqual(
-                    response.data["active_monitors"], 0
+                    response.data["active_monitors"],
+                    0,
                 )
 
                 for key in (
@@ -179,14 +199,21 @@ class DashboardSummaryTests(APITestCase):
                     "error_monitors",
                     "unchecked_monitors",
                 ):
-                    self.assertEqual(response.data[key], 0)
+                    self.assertEqual(
+                        response.data[key],
+                        0,
+                    )
 
                 resource.is_active = True
                 resource.save(update_fields=["is_active"])
 
     def test_open_and_resolved_incident_counts(self):
-        failure = self.create_check(MonitorCheck.Status.DOWN)
-        recovery = self.create_check(MonitorCheck.Status.UP)
+        failure = self.create_check(
+            MonitorCheck.Status.DOWN
+        )
+        recovery = self.create_check(
+            MonitorCheck.Status.UP
+        )
 
         Incident.objects.create(
             monitor=self.monitor,
@@ -210,6 +237,15 @@ class DashboardSummaryTests(APITestCase):
         response = self.client.get(self.url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["open_incidents"], 1)
-        self.assertEqual(response.data["resolved_incidents"], 1)
-        self.assertEqual(response.data["down_monitors"], 1)
+        self.assertEqual(
+            response.data["open_incidents"],
+            1,
+        )
+        self.assertEqual(
+            response.data["resolved_incidents"],
+            1,
+        )
+        self.assertEqual(
+            response.data["down_monitors"],
+            1,
+        )
