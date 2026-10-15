@@ -1,6 +1,9 @@
 import time
 
 import httpx
+from django.db import transaction
+
+from incidents.services import update_incident_for_check
 
 from .models import MonitorCheck
 
@@ -55,12 +58,17 @@ def run_monitor_check(monitor):
         2,
     )
 
-    return MonitorCheck.objects.create(
-        monitor=monitor,
-        checked_url=checked_url,
-        expected_status_code=expected_code,
-        status=check_status,
-        status_code=status_code,
-        response_time_ms=elapsed_ms,
-        error_message=error_message,
-    )
+    with transaction.atomic():
+        check = MonitorCheck.objects.create(
+            monitor=monitor,
+            checked_url=checked_url,
+            expected_status_code=expected_code,
+            status=check_status,
+            status_code=status_code,
+            response_time_ms=elapsed_ms,
+            error_message=error_message,
+        )
+
+        update_incident_for_check(check)
+
+    return check
