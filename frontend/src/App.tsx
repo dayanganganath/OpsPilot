@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 
 import Dashboard from './Dashboard'
 import Monitors from './Monitors'
+import Incidents from './Incidents'
 
 type User = {
   id: number
@@ -180,6 +181,8 @@ export default function App() {
           <Dashboard />
 
           <Monitors />
+
+          <Incidents />
 
           {error && (
             <p className="error-message" role="alert">

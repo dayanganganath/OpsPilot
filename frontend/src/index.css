@@ -288,3 +288,51 @@ button:disabled {
   border-radius: 10px;
   background: #0b1424;
 }
+
+.incident-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.filter-button {
+  width: auto;
+  padding: 10px 18px;
+  background: #172439;
+  color: #cbd5e1;
+  border: 1px solid #384961;
+}
+
+.filter-button[aria-pressed="true"] {
+  background: #5eead4;
+  color: #082a2b;
+  border-color: #5eead4;
+}
+
+.filter-button:hover:not(:disabled) {
+  color: #082a2b;
+}
+
+.incident-title {
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.incident-details {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 0;
+}
+
+.incident-details dt {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #a8b6ca;
+}
+
+.incident-details dd {
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
