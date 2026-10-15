@@ -10,6 +10,7 @@ import {
 
 import Applications from './Applications'
 import Dashboard from './Dashboard'
+import Environments from './Environments'
 import Incidents from './Incidents'
 import Monitors from './Monitors'
 
@@ -26,8 +27,9 @@ type AuthResponse = {
 const navigation = [
   { path: '/dashboard', label: 'Dashboard', number: '01' },
   { path: '/applications', label: 'Applications', number: '02' },
-  { path: '/monitors', label: 'Monitors', number: '03' },
-  { path: '/incidents', label: 'Incidents', number: '04' },
+  { path: '/environments', label: 'Environments', number: '03' },
+  { path: '/monitors', label: 'Monitors', number: '04' },
+  { path: '/incidents', label: 'Incidents', number: '05' },
 ]
 
 async function api<T>(
@@ -316,6 +318,7 @@ function OpsPilotApp() {
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/applications" element={<Applications />} />
+            <Route path="/environments" element={<Environments />} />
             <Route path="/monitors" element={<Monitors />} />
             <Route path="/incidents" element={<Incidents />} />
 

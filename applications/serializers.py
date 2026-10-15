@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from .models import Application, Environment
 
@@ -43,6 +44,10 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
 
 class EnvironmentSerializer(serializers.ModelSerializer):
+    application = serializers.PrimaryKeyRelatedField(
+        queryset=Application.objects.none(),
+    )
+
     application_name = serializers.CharField(
         source="application.name",
         read_only=True,
@@ -62,4 +67,42 @@ class EnvironmentSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
-        read_only_fields = fields
+        read_only_fields = [
+            "id",
+            "application_name",
+            "created_at",
+            "updated_at",
+        ]
+
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Environment.objects.all(),
+                fields=["application", "kind"],
+                message=(
+                    "This application already has an environment "
+                    "of this kind."
+                ),
+            )
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        request = self.context.get("request")
+
+        if request is not None and request.user.is_authenticated:
+            self.fields["application"].queryset = (
+                Application.objects.filter(owner=request.user)
+            )
+
+    def validate_application(self, value):
+        if (
+            self.instance is not None
+            and value.pk != self.instance.application_id
+        ):
+            raise serializers.ValidationError(
+                "An existing environment cannot be moved "
+                "to another application."
+            )
+
+        return value
