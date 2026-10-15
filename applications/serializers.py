@@ -11,6 +11,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Application
+
         fields = [
             "id",
             "name",
@@ -22,7 +23,23 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = fields
+
+        read_only_fields = [
+            "id",
+            "owner_username",
+            "created_at",
+            "updated_at",
+        ]
+
+    def validate_name(self, value):
+        value = value.strip()
+
+        if len(value) < 2:
+            raise serializers.ValidationError(
+                "Application name must contain at least 2 characters."
+            )
+
+        return value
 
 
 class EnvironmentSerializer(serializers.ModelSerializer):
@@ -33,6 +50,7 @@ class EnvironmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Environment
+
         fields = [
             "id",
             "application",
@@ -43,4 +61,5 @@ class EnvironmentSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
+
         read_only_fields = fields

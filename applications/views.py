@@ -1,5 +1,9 @@
+from rest_framework import mixins
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import (
+    GenericViewSet,
+    ReadOnlyModelViewSet,
+)
 
 from .models import Application, Environment
 from .serializers import (
@@ -8,7 +12,13 @@ from .serializers import (
 )
 
 
-class ApplicationViewSet(ReadOnlyModelViewSet):
+class ApplicationViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericViewSet,
+):
     serializer_class = ApplicationSerializer
     permission_classes = [IsAuthenticated]
 
@@ -18,6 +28,9 @@ class ApplicationViewSet(ReadOnlyModelViewSet):
             .filter(owner=self.request.user)
             .select_related("owner")
         )
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class EnvironmentViewSet(ReadOnlyModelViewSet):

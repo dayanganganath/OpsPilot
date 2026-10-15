@@ -8,9 +8,10 @@ import {
   Routes,
 } from 'react-router-dom'
 
+import Applications from './Applications'
 import Dashboard from './Dashboard'
-import Monitors from './Monitors'
 import Incidents from './Incidents'
+import Monitors from './Monitors'
 
 type User = {
   id: number
@@ -21,6 +22,13 @@ type User = {
 type AuthResponse = {
   user: User
 }
+
+const navigation = [
+  { path: '/dashboard', label: 'Dashboard', number: '01' },
+  { path: '/applications', label: 'Applications', number: '02' },
+  { path: '/monitors', label: 'Monitors', number: '03' },
+  { path: '/incidents', label: 'Incidents', number: '04' },
+]
 
 async function api<T>(
   url: string,
@@ -128,9 +136,7 @@ function OpsPilotApp() {
       setPassword('')
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Login failed.',
+        err instanceof Error ? err.message : 'Login failed.',
       )
     } finally {
       setBusy(false)
@@ -159,9 +165,7 @@ function OpsPilotApp() {
       setPassword('')
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'Logout failed.',
+        err instanceof Error ? err.message : 'Logout failed.',
       )
     } finally {
       setBusy(false)
@@ -171,7 +175,7 @@ function OpsPilotApp() {
   if (checkingSession) {
     return (
       <main className="auth-page">
-        <p role="status">Connecting to OpsPilot…</p>
+        <p role="status">Connecting to OpsPilot...</p>
       </main>
     )
   }
@@ -230,7 +234,7 @@ function OpsPilotApp() {
                   )}
 
                   <button type="submit" disabled={busy}>
-                    {busy ? 'Signing in…' : 'Sign in'}
+                    {busy ? 'Signing in...' : 'Sign in'}
                   </button>
                 </form>
               </section>
@@ -251,6 +255,7 @@ function OpsPilotApp() {
       <aside className="app-sidebar">
         <div className="sidebar-brand">
           <div className="brand-mark">OP</div>
+
           <div>
             <strong>OpsPilot</strong>
             <span>Operations workspace</span>
@@ -258,35 +263,18 @@ function OpsPilotApp() {
         </div>
 
         <nav className="sidebar-nav" aria-label="Main navigation">
-          <NavLink
-            to="/dashboard"
-            className={({ isActive }) =>
-              `sidebar-link${isActive ? ' active' : ''}`
-            }
-          >
-            <span aria-hidden="true">01</span>
-            Dashboard
-          </NavLink>
-
-          <NavLink
-            to="/monitors"
-            className={({ isActive }) =>
-              `sidebar-link${isActive ? ' active' : ''}`
-            }
-          >
-            <span aria-hidden="true">02</span>
-            Monitors
-          </NavLink>
-
-          <NavLink
-            to="/incidents"
-            className={({ isActive }) =>
-              `sidebar-link${isActive ? ' active' : ''}`
-            }
-          >
-            <span aria-hidden="true">03</span>
-            Incidents
-          </NavLink>
+          {navigation.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `sidebar-link${isActive ? ' active' : ''}`
+              }
+            >
+              <span aria-hidden="true">{item.number}</span>
+              {item.label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="sidebar-account">
@@ -299,7 +287,7 @@ function OpsPilotApp() {
             disabled={busy}
             onClick={() => void handleLogout()}
           >
-            {busy ? 'Signing out…' : 'Sign out'}
+            {busy ? 'Signing out...' : 'Sign out'}
           </button>
 
           {error && (
@@ -327,6 +315,7 @@ function OpsPilotApp() {
         <main className="app-content">
           <Routes>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/applications" element={<Applications />} />
             <Route path="/monitors" element={<Monitors />} />
             <Route path="/incidents" element={<Incidents />} />
 
