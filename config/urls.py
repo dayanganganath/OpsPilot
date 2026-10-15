@@ -6,6 +6,7 @@ from .views import health
 urlpatterns = [
     path("health/", health, name="health"),
     path("admin/", admin.site.urls),
+    path("api/auth/", include("accounts.urls")),
     path("api/", include("applications.urls")),
     path("api/", include("monitoring.urls")),
     path("api/", include("incidents.urls")),
