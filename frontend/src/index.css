@@ -560,3 +560,88 @@ button:disabled {
     padding: 24px 16px;
   }
 }
+
+.monitor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.monitor-actions button {
+  width: auto;
+  flex: 1;
+}
+
+.secondary-button {
+  padding: 12px 18px;
+  background: #1e2d43;
+  color: #e8edf5;
+  border: 1px solid #384961;
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: #30445f;
+}
+
+.history-panel {
+  margin-top: 32px;
+  padding: 24px;
+  background: #111c2e;
+  border: 1px solid #26354b;
+  border-radius: 14px;
+}
+
+.history-panel h2 {
+  overflow-wrap: anywhere;
+}
+
+.history-table-wrap {
+  overflow-x: auto;
+}
+
+.history-table-wrap:focus-visible {
+  outline: 3px solid #5eead4;
+  outline-offset: 3px;
+}
+
+.history-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+
+.history-table caption {
+  padding: 12px 0;
+  color: #a8b6ca;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.history-table th,
+.history-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #26354b;
+  vertical-align: top;
+}
+
+.history-table th {
+  color: #a8b6ca;
+  white-space: nowrap;
+}
+
+.history-table td {
+  line-height: 1.6;
+}
+
+.history-url {
+  min-width: 180px;
+  max-width: 300px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 480px) {
+  .history-panel {
+    padding: 18px 14px;
+  }
+}
