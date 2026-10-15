@@ -1,5 +1,12 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import {
+  BrowserRouter,
+  Navigate,
+  NavLink,
+  Route,
+  Routes,
+} from 'react-router-dom'
 
 import Dashboard from './Dashboard'
 import Monitors from './Monitors'
@@ -43,7 +50,7 @@ async function getCsrfToken(): Promise<string> {
   return data.csrfToken
 }
 
-export default function App() {
+function OpsPilotApp() {
   const [user, setUser] = useState<User | null>(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -169,92 +176,175 @@ export default function App() {
     )
   }
 
-  if (user) {
+  if (!user) {
     return (
-      <main className="workspace-page">
-        <section className="workspace-card">
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            <main className="auth-page">
+              <section className="auth-card">
+                <div className="brand-mark">OP</div>
+                <p className="eyebrow">OPSPILOT</p>
+
+                <h1>Your operations, in view.</h1>
+
+                <p className="description">
+                  Sign in to monitor services and manage incidents.
+                </p>
+
+                <form onSubmit={handleLogin}>
+                  <label htmlFor="username">Username</label>
+
+                  <input
+                    id="username"
+                    name="username"
+                    autoComplete="username"
+                    value={username}
+                    onChange={(event) =>
+                      setUsername(event.target.value)
+                    }
+                    disabled={busy}
+                    required
+                  />
+
+                  <label htmlFor="password">Password</label>
+
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(event) =>
+                      setPassword(event.target.value)
+                    }
+                    disabled={busy}
+                    required
+                  />
+
+                  {error && (
+                    <p className="error-message" role="alert">
+                      {error}
+                    </p>
+                  )}
+
+                  <button type="submit" disabled={busy}>
+                    {busy ? 'Signing in…' : 'Sign in'}
+                  </button>
+                </form>
+              </section>
+            </main>
+          }
+        />
+
+        <Route
+          path="*"
+          element={<Navigate to="/login" replace />}
+        />
+      </Routes>
+    )
+  }
+
+  return (
+    <div className="app-shell">
+      <aside className="app-sidebar">
+        <div className="sidebar-brand">
           <div className="brand-mark">OP</div>
-          <p className="eyebrow">OPSPILOT</p>
+          <div>
+            <strong>OpsPilot</strong>
+            <span>Operations workspace</span>
+          </div>
+        </div>
 
-          <h1>Welcome, {user.username}</h1>
+        <nav className="sidebar-nav" aria-label="Main navigation">
+          <NavLink
+            to="/dashboard"
+            className={({ isActive }) =>
+              `sidebar-link${isActive ? ' active' : ''}`
+            }
+          >
+            <span aria-hidden="true">01</span>
+            Dashboard
+          </NavLink>
 
-          <Dashboard />
+          <NavLink
+            to="/monitors"
+            className={({ isActive }) =>
+              `sidebar-link${isActive ? ' active' : ''}`
+            }
+          >
+            <span aria-hidden="true">02</span>
+            Monitors
+          </NavLink>
 
-          <Monitors />
+          <NavLink
+            to="/incidents"
+            className={({ isActive }) =>
+              `sidebar-link${isActive ? ' active' : ''}`
+            }
+          >
+            <span aria-hidden="true">03</span>
+            Incidents
+          </NavLink>
+        </nav>
 
-          <Incidents />
-
-          {error && (
-            <p className="error-message" role="alert">
-              {error}
-            </p>
-          )}
+        <div className="sidebar-account">
+          <span className="account-label">SIGNED IN AS</span>
+          <strong>{user.username}</strong>
 
           <button
             type="button"
+            className="signout-button"
             disabled={busy}
             onClick={() => void handleLogout()}
           >
             {busy ? 'Signing out…' : 'Sign out'}
           </button>
-        </section>
-      </main>
-    )
-  }
-
-  return (
-    <main className="auth-page">
-      <section className="auth-card">
-        <div className="brand-mark">OP</div>
-        <p className="eyebrow">OPSPILOT</p>
-
-        <h1>Your operations, in view.</h1>
-
-        <p className="description">
-          Sign in to monitor services and manage incidents.
-        </p>
-
-        <form onSubmit={handleLogin}>
-          <label htmlFor="username">Username</label>
-
-          <input
-            id="username"
-            name="username"
-            autoComplete="username"
-            value={username}
-            onChange={(event) =>
-              setUsername(event.target.value)
-            }
-            disabled={busy}
-            required
-          />
-
-          <label htmlFor="password">Password</label>
-
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) =>
-              setPassword(event.target.value)
-            }
-            disabled={busy}
-            required
-          />
 
           {error && (
             <p className="error-message" role="alert">
               {error}
             </p>
           )}
+        </div>
+      </aside>
 
-          <button type="submit" disabled={busy}>
-            {busy ? 'Signing in…' : 'Sign in'}
-          </button>
-        </form>
-      </section>
-    </main>
+      <div className="app-main">
+        <header className="workspace-header">
+          <div>
+            <p className="eyebrow">OPSPILOT WORKSPACE</p>
+            <p className="workspace-greeting">
+              Welcome, {user.username}
+            </p>
+          </div>
+
+          <span className="workspace-tag">
+            Service operations
+          </span>
+        </header>
+
+        <main className="app-content">
+          <Routes>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/monitors" element={<Monitors />} />
+            <Route path="/incidents" element={<Incidents />} />
+
+            <Route
+              path="*"
+              element={<Navigate to="/dashboard" replace />}
+            />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <OpsPilotApp />
+    </BrowserRouter>
   )
 }

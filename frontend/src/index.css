@@ -336,3 +336,227 @@ button:disabled {
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
+  min-height: 100vh;
+  background: #0b1120;
+}
+
+.app-sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 20px;
+  background: #101a2b;
+  border-right: 1px solid #26354b;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 44px;
+}
+
+.sidebar-brand .brand-mark {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.sidebar-brand strong {
+  display: block;
+  font-size: 20px;
+}
+
+.sidebar-brand span {
+  display: block;
+  margin-top: 5px;
+  font-size: 11px;
+  color: #a8b6ca;
+}
+
+.sidebar-nav {
+  display: grid;
+  gap: 10px;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: #b7c4d8;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.sidebar-link span {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.sidebar-link:hover {
+  background: #19283d;
+  color: #ffffff;
+}
+
+.sidebar-link.active {
+  background: #153a39;
+  border-color: #285b55;
+  color: #99f6e4;
+}
+
+.sidebar-link:focus-visible {
+  outline: 3px solid #5eead4;
+  outline-offset: 3px;
+}
+
+.sidebar-account {
+  display: grid;
+  gap: 12px;
+  margin-top: auto;
+  padding-top: 32px;
+  overflow-wrap: anywhere;
+}
+
+.account-label {
+  color: #a8b6ca;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+}
+
+.signout-button {
+  margin-top: 8px;
+  background: #1e2d43;
+  color: #e8edf5;
+  border: 1px solid #384961;
+}
+
+.signout-button:hover:not(:disabled) {
+  background: #30445f;
+}
+
+.app-main {
+  min-width: 0;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 36px;
+  border-bottom: 1px solid #26354b;
+}
+
+.workspace-header .eyebrow {
+  margin: 0 0 8px;
+}
+
+.workspace-greeting {
+  margin: 0;
+  color: #cbd5e1;
+  overflow-wrap: anywhere;
+}
+
+.workspace-tag {
+  padding: 8px 12px;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  color: #a8b6ca;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.app-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px 36px;
+}
+
+.app-content > .dashboard {
+  margin-top: 0;
+}
+
+@media (max-width: 850px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-sidebar {
+    position: static;
+    height: auto;
+    padding: 20px;
+    border-right: 0;
+    border-bottom: 1px solid #26354b;
+  }
+
+  .sidebar-brand {
+    margin-bottom: 20px;
+  }
+
+  .sidebar-nav {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .sidebar-link {
+    justify-content: center;
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+
+  .sidebar-link span {
+    display: none;
+  }
+
+  .sidebar-account {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px 16px;
+    padding-top: 20px;
+  }
+
+  .sidebar-account .account-label {
+    grid-column: 1;
+  }
+
+  .sidebar-account > strong {
+    grid-column: 1;
+  }
+
+  .sidebar-account .signout-button {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    width: auto;
+    margin: 0;
+  }
+
+  .sidebar-account .error-message {
+    grid-column: 1 / -1;
+  }
+
+  .workspace-header {
+    padding: 20px;
+  }
+
+  .app-content {
+    padding: 24px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-tag {
+    display: none;
+  }
+
+  .app-content {
+    padding: 24px 16px;
+  }
+}
