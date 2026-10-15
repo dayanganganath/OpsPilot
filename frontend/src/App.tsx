@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 
+import Dashboard from './Dashboard'
+
 type User = {
   id: number
   username: string
@@ -88,7 +90,9 @@ export default function App() {
     return () => controller.abort()
   }, [])
 
-  async function handleLogin(event: FormEvent<HTMLFormElement>) {
+  async function handleLogin(
+    event: FormEvent<HTMLFormElement>,
+  ) {
     event.preventDefault()
     setBusy(true)
     setError('')
@@ -96,23 +100,28 @@ export default function App() {
     try {
       const csrfToken = await getCsrfToken()
 
-      const data = await api<AuthResponse>('/api/auth/login/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrfToken,
+      const data = await api<AuthResponse>(
+        '/api/auth/login/',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrfToken,
+          },
+          body: JSON.stringify({
+            username: username.trim(),
+            password,
+          }),
         },
-        body: JSON.stringify({
-          username: username.trim(),
-          password,
-        }),
-      })
+      )
 
       setUser(data.user)
       setPassword('')
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Login failed.',
+        err instanceof Error
+          ? err.message
+          : 'Login failed.',
       )
     } finally {
       setBusy(false)
@@ -126,19 +135,24 @@ export default function App() {
     try {
       const csrfToken = await getCsrfToken()
 
-      await api<{ detail: string }>('/api/auth/logout/', {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': csrfToken,
+      await api<{ detail: string }>(
+        '/api/auth/logout/',
+        {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          },
         },
-      })
+      )
 
       setUser(null)
       setUsername('')
       setPassword('')
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : 'Logout failed.',
+        err instanceof Error
+          ? err.message
+          : 'Logout failed.',
       )
     } finally {
       setBusy(false)
@@ -153,76 +167,87 @@ export default function App() {
     )
   }
 
+  if (user) {
+    return (
+      <main className="workspace-page">
+        <section className="workspace-card">
+          <div className="brand-mark">OP</div>
+          <p className="eyebrow">OPSPILOT</p>
+
+          <h1>Welcome, {user.username}</h1>
+
+          <Dashboard />
+
+          {error && (
+            <p className="error-message" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void handleLogout()}
+          >
+            {busy ? 'Signing out…' : 'Sign out'}
+          </button>
+        </section>
+      </main>
+    )
+  }
+
   return (
     <main className="auth-page">
       <section className="auth-card">
         <div className="brand-mark">OP</div>
         <p className="eyebrow">OPSPILOT</p>
 
-        {user ? (
-          <>
-            <h1>Welcome, {user.username}</h1>
-            <p className="description">
-              You are signed in. Your operations workspace is ready.
+        <h1>Your operations, in view.</h1>
+
+        <p className="description">
+          Sign in to monitor services and manage incidents.
+        </p>
+
+        <form onSubmit={handleLogin}>
+          <label htmlFor="username">Username</label>
+
+          <input
+            id="username"
+            name="username"
+            autoComplete="username"
+            value={username}
+            onChange={(event) =>
+              setUsername(event.target.value)
+            }
+            disabled={busy}
+            required
+          />
+
+          <label htmlFor="password">Password</label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) =>
+              setPassword(event.target.value)
+            }
+            disabled={busy}
+            required
+          />
+
+          {error && (
+            <p className="error-message" role="alert">
+              {error}
             </p>
+          )}
 
-            {error && (
-              <p className="error-message" role="alert">
-                {error}
-              </p>
-            )}
-
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => void handleLogout()}
-            >
-              {busy ? 'Signing out…' : 'Sign out'}
-            </button>
-          </>
-        ) : (
-          <>
-            <h1>Your operations, in view.</h1>
-            <p className="description">
-              Sign in to monitor services and manage incidents.
-            </p>
-
-            <form onSubmit={handleLogin}>
-              <label htmlFor="username">Username</label>
-              <input
-                id="username"
-                name="username"
-                autoComplete="username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                disabled={busy}
-                required
-              />
-
-              <label htmlFor="password">Password</label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                disabled={busy}
-                required
-              />
-
-              {error && (
-                <p className="error-message" role="alert">
-                  {error}
-                </p>
-              )}
-
-              <button type="submit" disabled={busy}>
-                {busy ? 'Signing in…' : 'Sign in'}
-              </button>
-            </form>
-          </>
-        )}
+          <button type="submit" disabled={busy}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
       </section>
     </main>
   )
