@@ -1,8 +1,8 @@
-from rest_framework import status
+from rest_framework import mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import GenericViewSet
 
 from .models import ServiceMonitor
 from .serializers import (
@@ -12,7 +12,13 @@ from .serializers import (
 from .services import run_monitor_check
 
 
-class ServiceMonitorViewSet(ReadOnlyModelViewSet):
+class ServiceMonitorViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    GenericViewSet,
+):
     serializer_class = ServiceMonitorSerializer
     permission_classes = [IsAuthenticated]
 

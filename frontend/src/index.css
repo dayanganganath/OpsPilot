@@ -759,3 +759,16 @@ button:disabled {
   outline: 3px solid #5eead4;
   outline-offset: 3px;
 }
+
+.application-form-card > form {
+  margin-top: 24px;
+}
+
+.application-form-card > form + button {
+  margin-top: 12px;
+}
+
+.monitor-form-space {
+  max-width: 680px;
+  margin-bottom: 28px;
+}

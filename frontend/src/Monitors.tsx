@@ -1,13 +1,7 @@
 import { useEffect, useState } from 'react'
 
-type Monitor = {
-  id: number
-  name: string
-  environment_name: string
-  url: string
-  expected_status_code: number
-  is_active: boolean
-}
+import MonitorForm from './MonitorForm'
+import type { MonitorConfig } from './MonitorForm'
 
 type CheckResult = {
   id: number
@@ -46,7 +40,7 @@ function MonitorHistory({
   refreshKey,
   onClose,
 }: {
-  monitor: Monitor
+  monitor: MonitorConfig
   refreshKey: number
   onClose: () => void
 }) {
@@ -167,6 +161,7 @@ function MonitorHistory({
                       <td>
                         {new Date(check.checked_at).toLocaleString()}
                       </td>
+
                       <td>
                         <span
                           className={`status-badge ${check.status}`}
@@ -174,14 +169,18 @@ function MonitorHistory({
                           {check.status.toUpperCase()}
                         </span>
                       </td>
+
                       <td>{check.status_code ?? '-'}</td>
                       <td>{check.expected_status_code}</td>
+
                       <td>
                         {check.response_time_ms.toFixed(2)} ms
                       </td>
+
                       <td className="history-url">
                         {check.checked_url}
                       </td>
+
                       <td>{check.error_message || '-'}</td>
                     </tr>
                   ))}
@@ -196,17 +195,27 @@ function MonitorHistory({
 }
 
 export default function Monitors() {
-  const [monitors, setMonitors] = useState<Monitor[]>([])
+  const [monitors, setMonitors] = useState<MonitorConfig[]>([])
   const [results, setResults] = useState<
     Record<number, CheckResult>
   >({})
+
   const [loading, setLoading] = useState(true)
   const [runningId, setRunningId] = useState<number | null>(null)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [reloadKey, setReloadKey] = useState(0)
-  const [selectedMonitor, setSelectedMonitor] =
-    useState<Monitor | null>(null)
+
+  const [selectedId, setSelectedId] = useState<number | null>(null)
   const [historyRefreshKey, setHistoryRefreshKey] = useState(0)
+
+  const [showForm, setShowForm] = useState(false)
+  const [editingMonitor, setEditingMonitor] =
+    useState<MonitorConfig | null>(null)
+
+  const selectedMonitor = monitors.find(
+    (monitor) => monitor.id === selectedId,
+  )
 
   useEffect(() => {
     const controller = new AbortController()
@@ -216,9 +225,10 @@ export default function Monitors() {
       setError('')
 
       try {
-        const data = await request<Monitor[]>('/api/monitors/', {
-          signal: controller.signal,
-        })
+        const data = await request<MonitorConfig[]>(
+          '/api/monitors/',
+          { signal: controller.signal },
+        )
 
         if (!controller.signal.aborted) {
           setMonitors(data)
@@ -243,9 +253,62 @@ export default function Monitors() {
     return () => controller.abort()
   }, [reloadKey])
 
+  function openAddForm() {
+    setEditingMonitor(null)
+    setShowForm(true)
+    setError('')
+    setSuccess('')
+  }
+
+  function openEditForm(monitor: MonitorConfig) {
+    setEditingMonitor(monitor)
+    setShowForm(true)
+    setError('')
+    setSuccess('')
+  }
+
+  function closeForm() {
+    setShowForm(false)
+    setEditingMonitor(null)
+  }
+
+  function handleSaved(saved: MonitorConfig) {
+    const wasEditing = editingMonitor !== null
+
+    setMonitors((previous) => {
+      const exists = previous.some((item) => item.id === saved.id)
+
+      const updated = exists
+        ? previous.map((item) =>
+            item.id === saved.id ? saved : item,
+          )
+        : [...previous, saved]
+
+      return updated.sort((a, b) => a.name.localeCompare(b.name))
+    })
+
+    // Clear the card result after configuration changes.
+    // Saved check history remains unchanged in the database.
+    setResults((previous) => {
+      const updated = { ...previous }
+      delete updated[saved.id]
+      return updated
+    })
+
+    setHistoryRefreshKey((value) => value + 1)
+    closeForm()
+
+    setSuccess(
+      wasEditing
+        ? 'Monitor updated successfully.'
+        : 'Monitor created successfully.',
+    )
+  }
+
   async function checkNow(monitorId: number) {
     setRunningId(monitorId)
     setError('')
+    setSuccess('')
 
     try {
       const csrf = await request<{ csrfToken: string }>(
@@ -287,14 +350,24 @@ export default function Monitors() {
           <h2 id="monitors-heading">Monitors</h2>
         </div>
 
-        <button
-          type="button"
-          className="refresh-button"
-          disabled={loading || runningId !== null}
-          onClick={() => setReloadKey((value) => value + 1)}
-        >
-          Refresh list
-        </button>
+        <div className="monitor-actions">
+          <button
+            type="button"
+            className="refresh-button"
+            disabled={loading || runningId !== null || showForm}
+            onClick={() => setReloadKey((value) => value + 1)}
+          >
+            Refresh list
+          </button>
+
+          <button
+            type="button"
+            disabled={loading || runningId !== null || showForm}
+            onClick={openAddForm}
+          >
+            Add monitor
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -303,13 +376,30 @@ export default function Monitors() {
         </p>
       )}
 
+      {success && (
+        <p className="success-message" role="status">
+          {success}
+        </p>
+      )}
+
+      {showForm && (
+        <div className="monitor-form-space">
+          <MonitorForm
+            key={editingMonitor?.id ?? 'new-monitor'}
+            monitor={editingMonitor}
+            onSaved={handleSaved}
+            onCancel={closeForm}
+          />
+        </div>
+      )}
+
       {loading ? (
         <p role="status">Loading monitors...</p>
       ) : (
         <>
           {monitors.length === 0 && (
             <p className="dashboard-note">
-              No monitors found for your account.
+              No monitors found. Select Add monitor to create one.
             </p>
           )}
 
@@ -317,8 +407,7 @@ export default function Monitors() {
             {monitors.map((monitor) => {
               const result = results[monitor.id]
               const running = runningId === monitor.id
-              const historyOpen =
-                selectedMonitor?.id === monitor.id
+              const historyOpen = selectedId === monitor.id
 
               return (
                 <article className="monitor-card" key={monitor.id}>
@@ -342,6 +431,11 @@ export default function Monitors() {
 
                   <p className="dashboard-note">
                     Expected HTTP {monitor.expected_status_code}
+                    {' / '}Timeout {monitor.timeout_seconds}s
+                  </p>
+
+                  <p className="dashboard-note">
+                    Configured interval: {monitor.check_interval_seconds}s
                   </p>
 
                   <div className="check-result" aria-live="polite">
@@ -370,7 +464,8 @@ export default function Monitors() {
                       </>
                     ) : (
                       <p className="dashboard-note">
-                        Run a check for a result, or open saved history.
+                        Run a check for the current configuration,
+                        or open saved history.
                       </p>
                     )}
                   </div>
@@ -379,7 +474,9 @@ export default function Monitors() {
                     <button
                       type="button"
                       disabled={
-                        !monitor.is_active || runningId !== null
+                        !monitor.is_active ||
+                        runningId !== null ||
+                        showForm
                       }
                       onClick={() => void checkNow(monitor.id)}
                     >
@@ -391,12 +488,19 @@ export default function Monitors() {
                       className="secondary-button"
                       aria-expanded={historyOpen}
                       onClick={() =>
-                        setSelectedMonitor(
-                          historyOpen ? null : monitor,
-                        )
+                        setSelectedId(historyOpen ? null : monitor.id)
                       }
                     >
                       {historyOpen ? 'Hide history' : 'History'}
+                    </button>
+
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      disabled={runningId !== null || showForm}
+                      onClick={() => openEditForm(monitor)}
+                    >
+                      Edit
                     </button>
                   </div>
                 </article>
@@ -411,13 +515,13 @@ export default function Monitors() {
           key={selectedMonitor.id}
           monitor={selectedMonitor}
           refreshKey={historyRefreshKey}
-          onClose={() => setSelectedMonitor(null)}
+          onClose={() => setSelectedId(null)}
         />
       )}
 
       <p className="dashboard-note">
-        Card results show checks run on this screen. History loads saved
-        records. Refresh dashboard metrics after running a check.
+        Checks currently run manually. Automatic scheduling is not
+        enabled yet. Refresh dashboard metrics after running a check.
       </p>
     </section>
   )
